@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electron Browser</title>
+</head>
+<body>
+    <h1>SAX Browser</h1>
+    <div id="browser">
+        <input type="text" id="url" placeholder="Enter URL" />
+        <button id="go">Go</button>
+    </div>
+    <webview id="webview" style="width: 100%; height: calc(100vh - 100px);" src="https://www.google.com"></webview>
+    <script src="renderer.js"></script>
+</body>
+</html>
