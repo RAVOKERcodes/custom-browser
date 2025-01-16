@@ -13,93 +13,164 @@ webview.addEventListener('did-navigate', (event) => {
     urlInput.value = event.url;
 });
 
-function openFrame(frameId, url) {
-    let container = document.getElementById(frameId);
-    if (!container) {
-        container = document.createElement('div');
-        container.id = frameId;
-        container.style.position = 'fixed';
-        container.style.top = '50%';
-        container.style.left = '50%';
-        container.style.transform = 'translate(-50%, -50%)';
-        container.style.backgroundColor = 'white';
-        container.style.padding = '20px';
-        container.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
-        container.style.zIndex = '1000';
-        container.style.width = '800px';
-        container.style.height = '600px';
+// Panel and Frame Management
+let currentPanelId = null;
+let activeFrames = new Map(); // Track active frames by their ID
 
-        // Create header for dragging
-        const header = document.createElement('div');
-        header.style.padding = '10px';
-        header.style.marginBottom = '10px';
-        header.style.backgroundColor = '#f0f0f0';
-        header.style.cursor = 'move';
-        header.textContent = frameId.charAt(0).toUpperCase() + frameId.slice(1);
+function openPanel(id, url) {
+    const panel = document.getElementById('sidePanel');
+    const webview = document.getElementById('panelWebview');
+    const title = panel.querySelector('.panel-title');
+    
+    // Check if there's an active frame for this ID
+    const frameId = `frame-${id}`;
+    const activeFrame = activeFrames.get(id);
+    
+    if (activeFrame) {
+        // Re-attach frame content to panel
+        webview.src = activeFrame.webview.src;
+        title.textContent = id.charAt(0).toUpperCase() + id.slice(1);
+        panel.classList.add('active');
+        currentPanelId = id;
         
-        const webviewFrame = document.createElement('webview');
-        webviewFrame.style.width = '100%';
-        webviewFrame.style.height = 'calc(100% - 60px)';
-        webviewFrame.style.border = 'none';
-        webviewFrame.src = url;
-        webviewFrame.setAttribute('allowpopups', 'true');
+        // Remove the frame
+        activeFrame.element.remove();
+        activeFrames.delete(id);
+        return;
+    }
+    
+    // If clicking the same button and no frame exists, close the panel
+    if (currentPanelId === id) {
+        closePanel();
+        return;
+    }
+    
+    // Update panel content
+    title.textContent = id.charAt(0).toUpperCase() + id.slice(1);
+    webview.src = url;
+    
+    // Show panel
+    panel.classList.add('active');
+    currentPanelId = id;
+}
+
+function closePanel() {
+    const panel = document.getElementById('sidePanel');
+    panel.classList.remove('active');
+    currentPanelId = null;
+    
+    // Clear webview to stop any running processes
+    const webview = document.getElementById('panelWebview');
+    webview.src = 'about:blank';
+}
+
+function detachPanel() {
+    if (!currentPanelId) return;
+    
+    const panel = document.getElementById('sidePanel');
+    const webview = document.getElementById('panelWebview');
+    const title = panel.querySelector('.panel-title').textContent;
+    const url = webview.src;
+    
+    // Create new frame
+    createFrame(currentPanelId, url);
+    
+    // Close panel
+    closePanel();
+}
+
+function createFrame(id, url) {
+    const frameId = `frame-${id}`;
+    const frame = document.createElement('div');
+    frame.id = frameId;
+    frame.className = 'frame-container';
+    frame.style.width = '800px';
+    frame.style.height = '600px';
+    
+    // Set initial position without transform
+    const initialLeft = (window.innerWidth - 800) / 2;
+    const initialTop = (window.innerHeight - 600) / 2;
+    frame.style.position = 'fixed';
+    frame.style.left = initialLeft + 'px';
+    frame.style.top = initialTop + 'px';
+    
+    const header = document.createElement('div');
+    header.className = 'frame-header';
+    
+    const title = document.createElement('div');
+    title.textContent = id.charAt(0).toUpperCase() + id.slice(1);
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Close';
+    closeBtn.onclick = () => {
+        frame.remove();
+        activeFrames.delete(id);
+    };
+    
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+    
+    const webview = document.createElement('webview');
+    webview.style.width = '100%';
+    webview.style.height = 'calc(100% - 40px)';
+    webview.src = url;
+    webview.setAttribute('allowpopups', 'true');
+    
+    frame.appendChild(header);
+    frame.appendChild(webview);
+    document.body.appendChild(frame);
+    
+    // Store frame reference
+    activeFrames.set(id, {
+        element: frame,
+        webview: webview
+    });
+    
+    // Make frame draggable
+    makeDraggable(frame, header);
+    
+    // Show frame
+    frame.style.display = 'block';
+}
+
+function makeDraggable(element, handle) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    
+    handle.onmousedown = dragMouseDown;
+    
+    function dragMouseDown(e) {
+        e.preventDefault();
+        // Get the current mouse position
+        pos3 = e.clientX;
+        pos4 = e.clientY;
         
-        const closeButton = document.createElement('button');
-        closeButton.textContent = 'Close';
-        closeButton.onclick = () => container.remove();
-        closeButton.style.marginTop = '10px';
-        closeButton.style.padding = '5px 10px';
-        closeButton.style.cursor = 'pointer';
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
+    
+    function elementDrag(e) {
+        e.preventDefault();
+        // Calculate the new position
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
         
-        container.appendChild(header);
-        container.appendChild(webviewFrame);
-        container.appendChild(closeButton);
-        document.body.appendChild(container);
-
-        // Make draggable
-        let isDragging = false;
-        let currentX;
-        let currentY;
-        let initialX;
-        let initialY;
-        let xOffset = 0;
-        let yOffset = 0;
-
-        header.addEventListener('mousedown', dragStart);
-        document.addEventListener('mousemove', drag);
-        document.addEventListener('mouseup', dragEnd);
-
-        function dragStart(e) {
-            initialX = e.clientX - xOffset;
-            initialY = e.clientY - yOffset;
-
-            if (e.target === header) {
-                isDragging = true;
-            }
-        }
-
-        function drag(e) {
-            if (isDragging) {
-                e.preventDefault();
-                currentX = e.clientX - initialX;
-                currentY = e.clientY - initialY;
-
-                xOffset = currentX;
-                yOffset = currentY;
-
-                setTranslate(currentX, currentY, container);
-            }
-        }
-
-        function dragEnd(e) {
-            initialX = currentX;
-            initialY = currentY;
-            isDragging = false;
-        }
-
-        function setTranslate(xPos, yPos, el) {
-            el.style.transform = `translate(${xPos}px, ${yPos}px)`;
-        }
+        // Set the element's new position directly
+        const newTop = element.offsetTop - pos2;
+        const newLeft = element.offsetLeft - pos1;
+        
+        // Add bounds checking to keep frame within window
+        const maxTop = window.innerHeight - element.offsetHeight;
+        const maxLeft = window.innerWidth - element.offsetWidth;
+        
+        element.style.top = Math.min(Math.max(0, newTop), maxTop) + 'px';
+        element.style.left = Math.min(Math.max(0, newLeft), maxLeft) + 'px';
+    }
+    
+    function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
     }
 }
 
@@ -147,7 +218,8 @@ function createCustomButton() {
 function addButtonToUI(name, url) {
     const button = document.createElement('button');
     button.textContent = name;
-    button.onclick = () => openFrame(name.toLowerCase(), url);
+    const buttonId = name.toLowerCase();
+    button.onclick = () => openPanel(buttonId, url);
     button.id = `button-${Date.now()}`;
     
     // Add right-click event listener for context menu

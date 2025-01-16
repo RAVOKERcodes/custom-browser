@@ -30,11 +30,73 @@
             background: #ccc;
             margin: 4px 0;
         }
+
+        .side-panel {
+            position: fixed;
+            left: 5%;
+            top: 0;
+            height: 100vh;
+            width: 0;
+            background: white;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+            transition: width 0.3s ease;
+            overflow: hidden;
+            z-index: 2000;
+        }
+
+        .side-panel.active {
+            width: 50%;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f0f0f0;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .panel-title {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .panel-controls button {
+            padding: 4px 8px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+
+        .button-bar {
+            width: 5%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: white;
+            z-index: 2001;
+            position: relative;
+        }
+
+        .frame-container {
+            position: fixed;
+            display: none;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            z-index: 2500;
+        }
+
+        .frame-header {
+            padding: 10px;
+            background: #f0f0f0;
+            cursor: move;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
-    
-    
     <div id="browser" style="display: flex; gap: 10px; align-items: center;">
         <h1>ravo Browser</h1>
         <input type="text" id="url" placeholder="Enter URL" />
@@ -42,30 +104,28 @@
     </div>
 
     <div style="display: flex; width: 100%;">
-        
-        <div style="width: 5%; display: flex; flex-direction: column; gap: 10px;">
-            <button onclick="openFrame('chatgpt', 'https://chat.openai.com')">ChatGPT</button>
-            <button onclick="openFrame('whatsapp', 'https://web.whatsapp.com')">WhatsApp</button>
-            <button onclick="openFrame('spotify', 'https://open.spotify.com')">Spotify</button>
+        <div class="button-bar">
+            <button onclick="openPanel('chatgpt', 'https://chat.openai.com')">ChatGPT</button>
+            <button onclick="openPanel('whatsapp', 'https://web.whatsapp.com')">WhatsApp</button>
+            <button onclick="openPanel('spotify', 'https://open.spotify.com')">Spotify</button>
             <hr>
             <div id="customButtons"></div>
             <button onclick="showAddButtonForm()">Add Button</button>
         </div>
-        
-        <!-- Add Button Form -->
-        <div id="addButtonForm" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 2000;">
-            <h3>Add Custom Button</h3>
-            <input type="text" id="buttonName" placeholder="Button Name" style="display: block; margin: 10px 0;">
-            <input type="text" id="buttonUrl" placeholder="URL (with https://)" style="display: block; margin: 10px 0;">
-            <button onclick="createCustomButton()">Create</button>
-            <button onclick="hideAddButtonForm()">Cancel</button>
+
+        <div id="sidePanel" class="side-panel">
+            <div class="panel-header">
+                <h3 class="panel-title"></h3>
+                <div class="panel-controls">
+                    <button onclick="detachPanel()">Detach</button>
+                    <button onclick="closePanel()">Close</button>
+                </div>
+            </div>
+            <webview id="panelWebview" style="width: 100%; height: calc(100vh - 50px);"></webview>
         </div>
-    
-    
-    
-    
-    
-        <div style="flex: 1;"><webview id="webview" style="width: 100%; height: calc(100vh - 100px);" src="https://www.google.com"></webview>
+        
+        <div style="flex: 1;">
+            <webview id="webview" style="width: 100%; height: calc(100vh - 100px);" src="https://www.google.com"></webview>
         </div>
     </div>
 
@@ -73,6 +133,14 @@
         <div class="context-menu-item" id="removeButton">Remove Button</div>
         <div class="context-menu-separator"></div>
         <div class="context-menu-item" id="cancelContextMenu">Cancel</div>
+    </div>
+
+    <div id="addButtonForm" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 2000;">
+        <h3>Add Custom Button</h3>
+        <input type="text" id="buttonName" placeholder="Button Name" style="display: block; margin: 10px 0;">
+        <input type="text" id="buttonUrl" placeholder="URL (with https://)" style="display: block; margin: 10px 0;">
+        <button onclick="createCustomButton()">Create</button>
+        <button onclick="hideAddButtonForm()">Cancel</button>
     </div>
 
     <script src="renderer.js"></script>
