@@ -1,17 +1,70 @@
 const webview = document.getElementById('webview');
 const urlInput = document.getElementById('url');
 const goButton = document.getElementById('go');
+const backButton = document.getElementById('back');
+const forwardButton = document.getElementById('forward');
+
+// Navigation History
+let navigationHistory = [];
+let currentHistoryIndex = -1;
 
 // Navigate to URL
 goButton.addEventListener('click', () => {
     const url = urlInput.value.startsWith('http') ? urlInput.value : `https://${urlInput.value}`;
-    webview.src = url;
+    navigateTo(url);
 });
 
 // Update the input field with the current URL
 webview.addEventListener('did-navigate', (event) => {
     urlInput.value = event.url;
+    
+    // Add to navigation history
+    if (currentHistoryIndex === -1 || event.url !== navigationHistory[currentHistoryIndex]) {
+        // If we're not at the end of history, truncate future history
+        if (currentHistoryIndex < navigationHistory.length - 1) {
+            navigationHistory = navigationHistory.slice(0, currentHistoryIndex + 1);
+        }
+        
+        navigationHistory.push(event.url);
+        currentHistoryIndex++;
+    }
+    
+    // Update navigation button states
+    updateNavigationButtons();
 });
+
+// Navigation function
+function navigateTo(url) {
+    webview.src = url;
+}
+
+// Back navigation
+backButton.addEventListener('click', () => {
+    if (currentHistoryIndex > 0) {
+        currentHistoryIndex--;
+        const previousUrl = navigationHistory[currentHistoryIndex];
+        webview.src = previousUrl;
+        urlInput.value = previousUrl;
+        updateNavigationButtons();
+    }
+});
+
+// Forward navigation
+forwardButton.addEventListener('click', () => {
+    if (currentHistoryIndex < navigationHistory.length - 1) {
+        currentHistoryIndex++;
+        const nextUrl = navigationHistory[currentHistoryIndex];
+        webview.src = nextUrl;
+        urlInput.value = nextUrl;
+        updateNavigationButtons();
+    }
+});
+
+// Update navigation button states
+function updateNavigationButtons() {
+    backButton.disabled = currentHistoryIndex <= 0;
+    forwardButton.disabled = currentHistoryIndex >= navigationHistory.length - 1;
+}
 
 // Panel and Frame Management
 let currentPanelId = null;
@@ -290,4 +343,88 @@ document.addEventListener('DOMContentLoaded', () => {
     customButtons.forEach(({ name, url }) => {
         addButtonToUI(name, url);
     });
+});
+
+// Edit button functionality
+document.getElementById('editButton').addEventListener('click', () => {
+    const contextMenu = document.getElementById('customContextMenu');
+    const name = contextMenu.getAttribute('data-button-name');
+    const url = contextMenu.getAttribute('data-button-url');
+    
+    // Populate edit modal with current button details
+    document.getElementById('editButtonName').value = name;
+    document.getElementById('editButtonUrl').value = url;
+    
+    // Show edit modal
+    document.getElementById('editButtonModal').style.display = 'block';
+    
+    // Hide context menu
+    contextMenu.style.display = 'none';
+});
+
+// Save edited button
+document.getElementById('saveEditButton').addEventListener('click', () => {
+    const contextMenu = document.getElementById('customContextMenu');
+    const oldName = contextMenu.getAttribute('data-button-name');
+    
+    // Get new values
+    const newName = document.getElementById('editButtonName').value.trim();
+    const newUrl = document.getElementById('editButtonUrl').value.trim();
+    
+    // Validate inputs
+    if (!newName || !newUrl) {
+        alert('Please enter both name and URL');
+        return;
+    }
+    
+    // Get current custom buttons
+    let customButtons = JSON.parse(localStorage.getItem('customButtons') || '[]');
+    
+    // Find and update the button
+    const buttonIndex = customButtons.findIndex(btn => btn.name === oldName);
+    if (buttonIndex !== -1) {
+        customButtons[buttonIndex] = { name: newName, url: newUrl };
+        
+        // Save updated buttons
+        localStorage.setItem('customButtons', JSON.stringify(customButtons));
+        
+        // Update UI
+        const buttonElement = document.querySelector(`#customButtons button[data-name="${oldName}"]`);
+        if (buttonElement) {
+            buttonElement.textContent = newName;
+            buttonElement.setAttribute('data-name', newName);
+            buttonElement.setAttribute('data-url', newUrl);
+        }
+        
+        // Close modal
+        document.getElementById('editButtonModal').style.display = 'none';
+    }
+});
+
+// Cancel edit modal
+document.getElementById('cancelEditButton').addEventListener('click', () => {
+    document.getElementById('editButtonModal').style.display = 'none';
+});
+
+// Theme handling
+function toggleTheme() {
+    const root = document.documentElement;
+    const currentTheme = root.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    root.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    // Update button icon
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.innerHTML = `${newTheme === 'light' ? '🌓' : '☀️'} Theme`;
+}
+
+// Load saved theme
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.innerHTML = `${savedTheme === 'light' ? '🌓' : '☀️'} Theme`;
 });

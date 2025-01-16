@@ -1,0 +1,103 @@
+:root[data-theme="light"] {
+    --bg-color: white;
+    --text-color: black;
+    --header-bg: #f0f0f0;
+    --button-bg: #e0e0e0;
+    --button-hover: #d0d0d0;
+    --border-color: #ccc;
+    --panel-bg: white;
+}
+
+:root[data-theme="dark"] {
+    --bg-color: #1a1a1a;
+    --text-color: #ffffff;
+    --header-bg: #2d2d2d;
+    --button-bg: #3d3d3d;
+    --button-hover: #4d4d4d;
+    --border-color: #404040;
+    --panel-bg: #2d2d2d;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+button {
+    background-color: var(--button-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    transition: background-color 0.3s;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: var(--button-hover);
+}
+
+.side-panel {
+    background: var(--panel-bg) !important;
+    border-right: 1px solid var(--border-color);
+}
+
+.panel-header, .frame-header {
+    background: var(--header-bg) !important;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.frame-container {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+}
+
+#browser {
+    background: var(--header-bg);
+    padding: 10px;
+}
+
+input {
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 5px;
+}
+
+#back, #forward {
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#back:disabled, #forward:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#back:hover:not(:disabled), #forward:hover:not(:disabled) {
+    background-color: #f0f0f0;
+}
+
+#webviewContextMenu {
+    min-width: 200px;
+}
+
+#webviewContextMenu .context-menu-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#webviewContextMenu .context-menu-item:hover {
+    background-color: #f0f0f0;
+}
+
+#webviewContextMenu .context-menu-separator {
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 4px 0;
+}

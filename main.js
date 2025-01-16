@@ -7,6 +7,8 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
+        title: 'codebro',
+        icon: path.join(__dirname, 'icon.png'),
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
@@ -16,6 +18,7 @@ function createWindow() {
     });
 
     mainWindow.loadFile('index.html');
+    mainWindow.setTitle('codebro');
 }
 
 app.whenReady().then(() => {
@@ -29,5 +32,7 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') app.quit();
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
 });

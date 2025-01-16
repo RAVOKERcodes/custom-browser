@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="styles.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Electron Browser</title>
+    <title>codebro</title>
     <style>
         .context-menu {
             display: none;
@@ -94,13 +95,43 @@
             justify-content: space-between;
             align-items: center;
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <div id="browser" style="display: flex; gap: 10px; align-items: center;">
-        <h1>ravo Browser</h1>
+        <h1>codebro</h1>
+        <button id="back">←</button>
+        <button id="forward">→</button>
         <input type="text" id="url" placeholder="Enter URL" />
         <button id="go">Go</button>
+        <button id="themeToggle" onclick="toggleTheme()">🌓 Theme</button>
     </div>
 
     <div style="display: flex; width: 100%;">
@@ -130,9 +161,25 @@
     </div>
 
     <div id="customContextMenu" class="context-menu">
+        <div class="context-menu-item" id="editButton">Edit Button</div>
         <div class="context-menu-item" id="removeButton">Remove Button</div>
         <div class="context-menu-separator"></div>
         <div class="context-menu-item" id="cancelContextMenu">Cancel</div>
+    </div>
+
+    <div id="webviewContextMenu" class="context-menu">
+        <div class="context-menu-item" id="inspectElement">Inspect Element</div>
+        <div class="context-menu-item" id="viewPageSource">View Page Source</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" id="reloadPage">Reload</div>
+        <div class="context-menu-item" id="goBack">Back</div>
+        <div class="context-menu-item" id="goForward">Forward</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" id="saveAsPDF">Save as PDF</div>
+        <div class="context-menu-item" id="printPage">Print</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" id="copyAddress">Copy Address</div>
+        <div class="context-menu-item" id="castPage">Cast</div>
     </div>
 
     <div id="addButtonForm" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 2000;">
@@ -141,6 +188,20 @@
         <input type="text" id="buttonUrl" placeholder="URL (with https://)" style="display: block; margin: 10px 0;">
         <button onclick="createCustomButton()">Create</button>
         <button onclick="hideAddButtonForm()">Cancel</button>
+    </div>
+
+    <div id="editButtonModal" class="modal">
+        <div class="modal-content">
+            <h2>Edit Custom Button</h2>
+            <label for="editButtonName">Button Name:</label>
+            <input type="text" id="editButtonName" placeholder="Enter button name">
+            <label for="editButtonUrl">Button URL:</label>
+            <input type="text" id="editButtonUrl" placeholder="Enter button URL">
+            <div class="modal-buttons">
+                <button id="saveEditButton">Save</button>
+                <button id="cancelEditButton">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <script src="renderer.js"></script>
