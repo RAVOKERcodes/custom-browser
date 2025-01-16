@@ -4,14 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Electron Browser</title>
+    <style>
+        .context-menu {
+            display: none;
+            position: fixed;
+            background: white;
+            border: 1px solid #ccc;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            border-radius: 4px;
+            z-index: 3000;
+        }
+        
+        .context-menu-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .context-menu-item:hover {
+            background: #f0f0f0;
+        }
+        
+        .context-menu-separator {
+            height: 1px;
+            background: #ccc;
+            margin: 4px 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>SAX Browser</h1>
-    <div id="browser">
+    
+    
+    <div id="browser" style="display: flex; gap: 10px; align-items: center;">
+        <h1>ravo Browser</h1>
         <input type="text" id="url" placeholder="Enter URL" />
         <button id="go">Go</button>
     </div>
-    <webview id="webview" style="width: 100%; height: calc(100vh - 100px);" src="https://www.google.com"></webview>
+
+    <div style="display: flex; width: 100%;">
+        
+        <div style="width: 5%; display: flex; flex-direction: column; gap: 10px;">
+            <button onclick="openFrame('chatgpt', 'https://chat.openai.com')">ChatGPT</button>
+            <button onclick="openFrame('whatsapp', 'https://web.whatsapp.com')">WhatsApp</button>
+            <button onclick="openFrame('spotify', 'https://open.spotify.com')">Spotify</button>
+            <hr>
+            <div id="customButtons"></div>
+            <button onclick="showAddButtonForm()">Add Button</button>
+        </div>
+        
+        <!-- Add Button Form -->
+        <div id="addButtonForm" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 2000;">
+            <h3>Add Custom Button</h3>
+            <input type="text" id="buttonName" placeholder="Button Name" style="display: block; margin: 10px 0;">
+            <input type="text" id="buttonUrl" placeholder="URL (with https://)" style="display: block; margin: 10px 0;">
+            <button onclick="createCustomButton()">Create</button>
+            <button onclick="hideAddButtonForm()">Cancel</button>
+        </div>
+    
+    
+    
+    
+    
+        <div style="flex: 1;"><webview id="webview" style="width: 100%; height: calc(100vh - 100px);" src="https://www.google.com"></webview>
+        </div>
+    </div>
+
+    <div id="customContextMenu" class="context-menu">
+        <div class="context-menu-item" id="removeButton">Remove Button</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" id="cancelContextMenu">Cancel</div>
+    </div>
+
     <script src="renderer.js"></script>
 </body>
 </html>

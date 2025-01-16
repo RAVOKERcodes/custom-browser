@@ -1,24 +1,31 @@
 const { app, BrowserWindow } = require('electron');
+const path = require('path');
 
 let mainWindow;
 
-app.whenReady().then(() => {
+function createWindow() {
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1200,
+        height: 800,
         webPreferences: {
-            preload: __dirname + '/preload.js', // Path to preload.js
-            nodeIntegration: false,           // Disable Node.js integration in renderer
-            contextIsolation: true,           // Isolate context for security
-            webviewTag: true,                 // Enable webview tag if using <webview>
+            nodeIntegration: true,
+            contextIsolation: false,
+            webviewTag: true,
+            webSecurity: false
         },
     });
 
-    // Load index.html
     mainWindow.loadFile('index.html');
+}
 
-    // Open DevTools (optional, for debugging)
-    // mainWindow.webContents.openDevTools();
+app.whenReady().then(() => {
+    createWindow();
+
+    app.on('activate', () => {
+        if (BrowserWindow.getAllWindows().length === 0) {
+            createWindow();
+        }
+    });
 });
 
 app.on('window-all-closed', () => {
