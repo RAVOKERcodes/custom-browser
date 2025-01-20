@@ -1,5 +1,5 @@
 {
-  "name": "codebro",
+  "name": "Codebro",
   "version": "1.0.0",
   "description": "A modern web browser built with Electron",
   "main": "main.js",

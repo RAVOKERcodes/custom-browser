@@ -428,3 +428,95 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('themeToggle');
     themeToggle.innerHTML = `${savedTheme === 'light' ? '🌓' : '☀️'} Theme`;
 });
+
+// Webview Context Menu Handling
+const webviewContextMenu = document.getElementById('webviewContextMenu');
+
+webview.addEventListener('contextmenu', (e) => {
+    e.preventDefault(); // Prevent default context menu
+    
+    // Position the context menu near the mouse click
+    webviewContextMenu.style.display = 'block';
+    webviewContextMenu.style.left = `${e.clientX}px`;
+    webviewContextMenu.style.top = `${e.clientY}px`;
+});
+
+// Hide context menu when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.context-menu') && !e.target.closest('#webview')) {
+        webviewContextMenu.style.display = 'none';
+    }
+});
+
+// Context Menu Actions
+document.getElementById('inspectElement').addEventListener('click', () => {
+    webview.inspectElement(webview.getWebContents().getLastFocusedBounds().x, 
+                            webview.getWebContents().getLastFocusedBounds().y);
+    webviewContextMenu.style.display = 'none';
+});
+
+document.getElementById('viewPageSource').addEventListener('click', () => {
+    webview.executeJavaScript('window.location.href', false, (url) => {
+        const sourceUrl = `view-source:${url}`;
+        navigateTo(sourceUrl);
+    });
+    webviewContextMenu.style.display = 'none';
+});
+
+document.getElementById('reloadPage').addEventListener('click', () => {
+    webview.reload();
+    webviewContextMenu.style.display = 'none';
+});
+
+document.getElementById('goBack').addEventListener('click', () => {
+    if (currentHistoryIndex > 0) {
+        currentHistoryIndex--;
+        const previousUrl = navigationHistory[currentHistoryIndex];
+        webview.src = previousUrl;
+        urlInput.value = previousUrl;
+        updateNavigationButtons();
+    }
+    webviewContextMenu.style.display = 'none';
+});
+
+document.getElementById('goForward').addEventListener('click', () => {
+    if (currentHistoryIndex < navigationHistory.length - 1) {
+        currentHistoryIndex++;
+        const nextUrl = navigationHistory[currentHistoryIndex];
+        webview.src = nextUrl;
+        urlInput.value = nextUrl;
+        updateNavigationButtons();
+    }
+    webviewContextMenu.style.display = 'none';
+});
+
+document.getElementById('saveAsPDF').addEventListener('click', () => {
+    webview.printToPDF({}, (error, data) => {
+        if (error) {
+            console.error('Error generating PDF:', error);
+            return;
+        }
+        const blob = new Blob([data], { type: 'application/pdf' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'webpage.pdf';
+        link.click();
+    });
+    webviewContextMenu.style.display = 'none';
+});
+
+document.getElementById('printPage').addEventListener('click', () => {
+    webview.print();
+    webviewContextMenu.style.display = 'none';
+});
+
+document.getElementById('copyAddress').addEventListener('click', () => {
+    webview.executeJavaScript('window.location.href', false, (url) => {
+        navigator.clipboard.writeText(url).then(() => {
+            console.log('URL copied to clipboard');
+        }).catch(err => {
+            console.error('Failed to copy URL:', err);
+        });
+    });
+    webviewContextMenu.style.display = 'none';
+});

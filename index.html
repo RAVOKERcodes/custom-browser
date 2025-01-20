@@ -9,27 +9,26 @@
         .context-menu {
             display: none;
             position: fixed;
-            background: white;
+            background-color: white;
             border: 1px solid #ccc;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-            border-radius: 4px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
             z-index: 3000;
+            min-width: 200px;
         }
-        
+
         .context-menu-item {
             padding: 8px 12px;
             cursor: pointer;
-            font-size: 14px;
+            transition: background-color 0.3s;
         }
-        
+
         .context-menu-item:hover {
-            background: #f0f0f0;
+            background-color: #f0f0f0;
         }
-        
+
         .context-menu-separator {
-            height: 1px;
-            background: #ccc;
-            margin: 4px 0;
+            border-top: 1px solid #e0e0e0;
+            margin: 5px 0;
         }
 
         .side-panel {
@@ -126,7 +125,7 @@
 </head>
 <body>
     <div id="browser" style="display: flex; gap: 10px; align-items: center;">
-        <h1>codebro</h1>
+        <h1>Codebro </h1>
         <button id="back">←</button>
         <button id="forward">→</button>
         <input type="text" id="url" placeholder="Enter URL" />
@@ -190,8 +189,8 @@
         <button onclick="hideAddButtonForm()">Cancel</button>
     </div>
 
-    <div id="editButtonModal" class="modal">
-        <div class="modal-content">
+    <div id="editButtonModal" class="modal" >
+        <div class="modal-content" >
             <h2>Edit Custom Button</h2>
             <label for="editButtonName">Button Name:</label>
             <input type="text" id="editButtonName" placeholder="Enter button name">

@@ -19,6 +19,7 @@ function createWindow() {
 
     mainWindow.loadFile('index.html');
     mainWindow.setTitle('codebro');
+    // mainWindow.webContents.openDevTools(); // Open DevTools for debugging
 }
 
 app.whenReady().then(() => {
