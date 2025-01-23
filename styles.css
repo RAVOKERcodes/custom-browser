@@ -6,6 +6,8 @@
     --button-hover: #d0d0d0;
     --border-color: #ccc;
     --panel-bg: white;
+    --background-color: white;
+    --hover-background-color: #f0f0f0;
 }
 
 :root[data-theme="dark"] {
@@ -16,6 +18,8 @@
     --button-hover: #4d4d4d;
     --border-color: #404040;
     --panel-bg: #2d2d2d;
+    --background-color: #2d2d2d;
+    --hover-background-color: #3d3d3d;
 }
 
 body {
@@ -213,4 +217,39 @@ input {
     font-size: 1.2em;
     cursor: pointer;
     margin-left: 10px;
+}
+
+.browser-controls {
+    position: relative;
+}
+
+#urlSuggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: calc(100% - 20px);
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
+    display: none;
+    margin: 0 10px;
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.3s;
+    color: var(--text-color);
+}
+
+.suggestion-item:hover {
+    background-color: var(--hover-background-color);
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
 }

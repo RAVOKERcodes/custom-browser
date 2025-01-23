@@ -8,17 +8,47 @@ const forwardButton = document.getElementById('forward');
 let navigationHistory = [];
 let currentHistoryIndex = -1;
 
+// Enhanced navigation function
+function navigateTo(input) {
+    // Trim and clean the input
+    input = input.trim();
+
+    // Comprehensive URL validation regex
+    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+    const ipPattern = /^(https?:\/\/)?((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))(:\d+)?$/;
+    const localhostPattern = /^(https?:\/\/)?(localhost|127\.0\.0\.1)(:\d+)?$/;
+
+    // Function to search on Google
+    function searchOnGoogle(query) {
+        return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+    }
+
+    // Check if input is a valid URL, IP, or localhost
+    if (urlPattern.test(input) || ipPattern.test(input) || localhostPattern.test(input)) {
+        // If URL doesn't start with protocol, add https
+        const url = input.startsWith('http://') || input.startsWith('https://') 
+            ? input 
+            : `https://${input}`;
+        webview.src = url;
+        urlInput.value = url;
+    } 
+    // For anything else, search on Google
+    else {
+        const googleSearchUrl = searchOnGoogle(input);
+        webview.src = googleSearchUrl;
+        urlInput.value = googleSearchUrl;
+    }
+}
+
 // Navigate to URL
 goButton.addEventListener('click', () => {
-    const url = urlInput.value.startsWith('http') ? urlInput.value : `https://${urlInput.value}`;
-    navigateTo(url);
+    navigateTo(urlInput.value);
 });
 
 // Add Enter key support for URL input
 urlInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
-        const url = urlInput.value.startsWith('http') ? urlInput.value : `https://${urlInput.value}`;
-        navigateTo(url);
+        navigateTo(urlInput.value);
     }
 });
 
@@ -43,11 +73,6 @@ webview.addEventListener('did-navigate', (event) => {
     // Update navigation button states
     updateNavigationButtons();
 });
-
-// Navigation function
-function navigateTo(url) {
-    webview.src = url;
-}
 
 // Back navigation
 backButton.addEventListener('click', () => {
@@ -530,6 +555,109 @@ document.getElementById('copyAddress').addEventListener('click', () => {
         });
     });
     webviewContextMenu.style.display = 'none';
+});
+
+// URL Suggestion and Auto-completion
+const urlSuggestionsList = document.createElement('div');
+urlSuggestionsList.id = 'urlSuggestions';
+urlSuggestionsList.classList.add('url-suggestions');
+document.querySelector('.browser-controls').appendChild(urlSuggestionsList);
+
+// Popular search engines and websites for suggestions
+const popularSites = [
+    'google.com', 'youtube.com', 'wikipedia.org', 
+    'github.com', 'stackoverflow.com', 'reddit.com', 
+    'twitter.com', 'linkedin.com', 'amazon.com'
+];
+
+// Function to generate URL suggestions
+function generateUrlSuggestions(input) {
+    console.log('Generating suggestions for:', input); // Debug log
+    
+    // Clear previous suggestions
+    urlSuggestionsList.innerHTML = '';
+    
+    // If input is empty, don't show suggestions
+    if (!input) return;
+
+    // Intelligent prefix handling
+    const cleanInput = input.trim().toLowerCase();
+    
+    // Combine suggestions from different sources
+    const suggestions = [
+        // Add 'www.' prefix suggestions
+        ...popularSites.filter(site => 
+            site.includes(cleanInput) || 
+            `www.${site}`.includes(cleanInput)
+        ).map(site => `https://www.${site}`),
+        
+        // Add direct domain suggestions
+        ...popularSites.filter(site => 
+            site.startsWith(cleanInput)
+        ).map(site => `https://${site}`),
+        
+        // Add HTTP/HTTPS variations
+        ...[
+            cleanInput.startsWith('http://') ? 
+                cleanInput.replace('http://', 'https://') : 
+                `https://${cleanInput}`,
+            cleanInput.startsWith('https://') ? 
+                cleanInput.replace('https://', 'http://') : 
+                `http://${cleanInput}`,
+            cleanInput.startsWith('www.') ? 
+                `https://${cleanInput}` : 
+                `https://www.${cleanInput}`
+        ]
+    ];
+
+    // Remove duplicates and limit suggestions
+    const uniqueSuggestions = [...new Set(suggestions)].slice(0, 5);
+    
+    console.log('Unique suggestions:', uniqueSuggestions); // Debug log
+    
+    // Create suggestion elements
+    uniqueSuggestions.forEach(suggestion => {
+        const suggestionElement = document.createElement('div');
+        suggestionElement.classList.add('suggestion-item');
+        suggestionElement.textContent = suggestion;
+        suggestionElement.addEventListener('click', () => {
+            urlInput.value = suggestion;
+            navigateTo(suggestion);
+            urlSuggestionsList.innerHTML = ''; // Clear suggestions
+        });
+        urlSuggestionsList.appendChild(suggestionElement);
+    });
+
+    // Show suggestions only if there are any
+    urlSuggestionsList.style.display = uniqueSuggestions.length > 0 ? 'flex' : 'none';
+}
+
+// Debounce function to limit suggestion generation frequency
+function debounce(func, delay) {
+    let timeoutId;
+    return function() {
+        const context = this;
+        const args = arguments;
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(context, args);
+        }, delay);
+    };
+}
+
+// Add event listener for URL input with debounce
+const debouncedSuggestions = debounce((event) => {
+    generateUrlSuggestions(event.target.value);
+}, 300);
+
+urlInput.addEventListener('input', debouncedSuggestions);
+
+// Hide suggestions when clicking outside
+document.addEventListener('click', (event) => {
+    if (!urlInput.contains(event.target) && 
+        !urlSuggestionsList.contains(event.target)) {
+        urlSuggestionsList.style.display = 'none';
+    }
 });
 
 // History Panel Management
