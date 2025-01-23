@@ -14,6 +14,14 @@ goButton.addEventListener('click', () => {
     navigateTo(url);
 });
 
+// Add Enter key support for URL input
+urlInput.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
+        const url = urlInput.value.startsWith('http') ? urlInput.value : `https://${urlInput.value}`;
+        navigateTo(url);
+    }
+});
+
 // Update the input field with the current URL
 webview.addEventListener('did-navigate', (event) => {
     urlInput.value = event.url;
@@ -27,6 +35,9 @@ webview.addEventListener('did-navigate', (event) => {
         
         navigationHistory.push(event.url);
         currentHistoryIndex++;
+        
+        // Save to localStorage
+        saveHistory();
     }
     
     // Update navigation button states
@@ -520,3 +531,85 @@ document.getElementById('copyAddress').addEventListener('click', () => {
     });
     webviewContextMenu.style.display = 'none';
 });
+
+// History Panel Management
+const historyPanel = document.createElement('div');
+historyPanel.id = 'historyPanel';
+historyPanel.classList.add('side-panel');
+historyPanel.innerHTML = `
+    <div class="panel-header">
+        <h2>Browsing History</h2>
+        <button id="clearHistory">Clear History</button>
+        <button id="closeHistoryPanel">Close</button>
+    </div>
+    <div id="historyList"></div>
+`;
+document.body.appendChild(historyPanel);
+
+const historyListElement = document.getElementById('historyList');
+const clearHistoryButton = document.getElementById('clearHistory');
+const closeHistoryPanelButton = document.getElementById('closeHistoryPanel');
+
+// Load history from localStorage on startup
+function loadHistory() {
+    const storedHistory = localStorage.getItem('browserHistory');
+    if (storedHistory) {
+        navigationHistory = JSON.parse(storedHistory);
+        currentHistoryIndex = navigationHistory.length - 1;
+        renderHistoryPanel();
+    }
+}
+
+// Save history to localStorage
+function saveHistory() {
+    localStorage.setItem('browserHistory', JSON.stringify(navigationHistory));
+}
+
+// Render history panel
+function renderHistoryPanel() {
+    historyListElement.innerHTML = '';
+    navigationHistory.forEach((url, index) => {
+        const historyItem = document.createElement('div');
+        historyItem.classList.add('history-item');
+        historyItem.textContent = url;
+        historyItem.addEventListener('click', () => {
+            currentHistoryIndex = index;
+            webview.src = url;
+            urlInput.value = url;
+            updateNavigationButtons();
+            toggleHistoryPanel(); // Close panel after selecting
+        });
+        historyListElement.appendChild(historyItem);
+    });
+}
+
+// Toggle history panel
+function toggleHistoryPanel() {
+    historyPanel.classList.toggle('active');
+    if (historyPanel.classList.contains('active')) {
+        renderHistoryPanel();
+    }
+}
+
+// Clear history
+clearHistoryButton.addEventListener('click', () => {
+    navigationHistory = [];
+    currentHistoryIndex = -1;
+    localStorage.removeItem('browserHistory');
+    renderHistoryPanel();
+    updateNavigationButtons();
+});
+
+// Close history panel
+closeHistoryPanelButton.addEventListener('click', toggleHistoryPanel);
+
+// Add history panel button to UI
+const historyButton = document.createElement('button');
+historyButton.id = 'showHistory';
+historyButton.textContent = '📋';
+historyButton.title = 'Show Browsing History';
+historyButton.addEventListener('click', toggleHistoryPanel);
+document.getElementById('browser').appendChild(historyButton);
+
+// Load history on startup
+document.addEventListener('DOMContentLoaded', loadHistory);

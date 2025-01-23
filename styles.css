@@ -124,3 +124,93 @@ input {
     width: 90%;
     z-index: 10000;
 }
+
+.history-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.history-entry .history-url {
+    text-decoration: none;
+    color: var(--text-color);
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.history-entry .history-time {
+    font-size: 0.8em;
+    color: gray;
+    margin-left: 10px;
+}
+
+#historyButton {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+#historyPanel {
+    width: 0;
+    background-color: var(--panel-bg);
+    color: var(--text-color);
+    transition: width 0.3s ease;
+    overflow-x: hidden;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+}
+
+#historyPanel.active {
+    width: 300px;
+}
+
+#historyPanel .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#historyPanel .panel-header h2 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+#historyPanel .panel-header button {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 5px;
+}
+
+#historyList {
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+}
+
+.history-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.history-item:hover {
+    background-color: var(--button-bg);
+}
+
+#showHistory {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-left: 10px;
+}
