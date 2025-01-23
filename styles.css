@@ -253,3 +253,73 @@ input {
 .suggestion-item:last-child {
     border-bottom: none;
 }
+
+#downloadPanel {
+    width: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: width 0.3s ease;
+    overflow-x: hidden;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+}
+
+#downloadPanel.active {
+    width: 350px;
+}
+
+.download-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+}
+
+.download-item-details {
+    flex-grow: 1;
+    margin-left: 10px;
+}
+
+.download-item-name {
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.download-item-path {
+    color: var(--text-color-muted);
+    font-size: 0.8em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.download-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.download-action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    color: var(--text-color);
+}
+
+.download-action-btn:hover {
+    color: var(--button-hover);
+}
+
+.download-tooltip {
+    position: absolute;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    padding: 5px;
+    z-index: 1000;
+    display: none;
+    white-space: nowrap;
+}
