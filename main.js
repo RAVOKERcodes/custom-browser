@@ -5,45 +5,34 @@ const https = require('https');
 const os = require('os');
 const { networkInterfaces } = require('systeminformation');
 
-let mainWindow;
+let Store;
 
-const PROXY_SERVERS = {
-    us: 'us-wa.proxyme.org',
-    uk: 'uk-lon.proxyme.org',
-    de: 'de-fra.proxyme.org',
-    ca: 'ca-tor.proxyme.org',
-    nl: 'nl-ams.proxyme.org'
-};
+async function initStore() {
+    try {
+        const storeModule = await import('electron-store');
+        Store = storeModule.default;
 
-function setupDownloadHandler(mainWindow) {
-    // Download handler
-    session.defaultSession.on('will-download', (event, item, webContents) => {
-        // Get the download path (you can customize this)
-        const downloadPath = path.join(app.getPath('downloads'), item.getFilename());
-        
-        // Set the save path
-        item.setSavePath(downloadPath);
-        
-        // Notify renderer about download start
-        mainWindow.webContents.send('download-started', {
-            filename: item.getFilename(),
-            savePath: downloadPath
-        });
-        
-        item.on('done', (event, state) => {
-            if (state === 'completed') {
-                mainWindow.webContents.send('download-completed', {
-                    filename: item.getFilename(),
-                    savePath: downloadPath
-                });
+        // Settings Management
+        const settingsStore = new Store({
+            name: 'browser-settings',
+            defaults: {
+                startupPage: false,
+                newTabDefault: true,
+                theme: 'system',
+                clearHistoryOnExit: false,
+                trackingProtection: true,
+                hardwareAcceleration: true,
+                downloadLocation: app.getPath('downloads'),
+                vpnAutoConnect: false,
+                searchEngine: 'google'
             }
         });
-    });
 
-    // Listen for download requests from renderer
-    ipcMain.on('download-request', (event, { url }) => {
-        mainWindow.webContents.downloadURL(url);
-    });
+        // Expose settingsStore to other functions
+        global.settingsStore = settingsStore;
+    } catch (error) {
+        console.error('Failed to initialize electron-store:', error);
+    }
 }
 
 // VPN Connection Management
@@ -198,7 +187,103 @@ function setupNetworkSpeedHandler() {
     });
 }
 
-function createWindow() {
+function setupDownloadHandler(mainWindow) {
+    // Download handler
+    session.defaultSession.on('will-download', (event, item, webContents) => {
+        // Get the download path (you can customize this)
+        const downloadPath = path.join(app.getPath('downloads'), item.getFilename());
+        
+        // Set the save path
+        item.setSavePath(downloadPath);
+        
+        // Notify renderer about download start
+        mainWindow.webContents.send('download-started', {
+            filename: item.getFilename(),
+            savePath: downloadPath
+        });
+        
+        item.on('done', (event, state) => {
+            if (state === 'completed') {
+                mainWindow.webContents.send('download-completed', {
+                    filename: item.getFilename(),
+                    savePath: downloadPath
+                });
+            }
+        });
+    });
+
+    // Listen for download requests from renderer
+    ipcMain.on('download-request', (event, { url }) => {
+        mainWindow.webContents.downloadURL(url);
+    });
+}
+
+function setupSettingsHandlers() {
+    // Get current settings
+    ipcMain.handle('get-settings', () => {
+        return global.settingsStore.store;
+    });
+
+    // Update settings
+    ipcMain.on('update-settings', (event, settings) => {
+        // Update individual settings
+        Object.keys(settings).forEach(key => {
+            global.settingsStore.set(key, settings[key]);
+        });
+
+        // Apply settings immediately
+        applySettings(settings);
+    });
+
+    // Change download location
+    ipcMain.handle('choose-download-location', async () => {
+        const { dialog } = require('electron');
+        const result = await dialog.showOpenDialog(mainWindow, {
+            properties: ['openDirectory']
+        });
+
+        if (!result.canceled && result.filePaths.length > 0) {
+            const selectedPath = result.filePaths[0];
+            global.settingsStore.set('downloadLocation', selectedPath);
+            return selectedPath;
+        }
+
+        return global.settingsStore.get('downloadLocation');
+    });
+}
+
+function applySettings(settings) {
+    // Theme application
+    if (settings.theme) {
+        mainWindow.webContents.send('apply-theme', settings.theme);
+    }
+
+    // Hardware acceleration
+    if (settings.hardwareAcceleration !== undefined) {
+        app.disableHardwareAcceleration = !settings.hardwareAcceleration;
+    }
+
+    // Tracking protection
+    if (settings.trackingProtection !== undefined) {
+        mainWindow.webContents.session.setPermissionRequestHandler(
+            (webContents, permission, callback) => {
+                callback(!settings.trackingProtection);
+            }
+        );
+    }
+
+    // Download location
+    if (settings.downloadLocation) {
+        app.setPath('downloads', settings.downloadLocation);
+    }
+}
+
+async function createWindow() {
+    // Initialize electron-store first
+    await initStore();
+
+    let mainWindow;
+
     mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
@@ -227,20 +312,34 @@ function createWindow() {
     // Setup network speed handler
     setupNetworkSpeedHandler();
 
+    // Setup settings handlers
+    setupSettingsHandlers();
+
+    // Apply initial settings
+    if (global.settingsStore) {
+        applySettings(global.settingsStore.store);
+    }
+
     // Rest of your existing window setup code
     mainWindow.loadFile('index.html');
     mainWindow.setTitle('codebro');
     // mainWindow.webContents.openDevTools(); // Open DevTools for debugging
 }
 
-app.whenReady().then(() => {
-    createWindow();
+const PROXY_SERVERS = {
+    us: 'us-wa.proxyme.org',
+    uk: 'uk-lon.proxyme.org',
+    de: 'de-fra.proxyme.org',
+    ca: 'ca-tor.proxyme.org',
+    nl: 'nl-ams.proxyme.org'
+};
 
-    app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
-        }
-    });
+app.whenReady().then(createWindow);
+
+app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
+    }
 });
 
 app.on('window-all-closed', () => {

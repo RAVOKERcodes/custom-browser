@@ -1462,3 +1462,18 @@ function trackNetworkSpeed() {
 
 // Initialize network speed tracking
 trackNetworkSpeed();
+
+// Settings Button
+const settingsButton = document.createElement('button');
+settingsButton.id = 'openSettings';
+settingsButton.textContent = '⚙️';
+settingsButton.title = 'Open Settings';
+settingsButton.addEventListener('click', () => {
+    // Open settings in a new tab
+    const settingsUrl = 'settings.html';
+    tabManager.createNewTab(settingsUrl);
+});
+
+// Add settings button to browser controls
+const browserControls = document.querySelector('.browser-controls');
+browserControls.appendChild(settingsButton);

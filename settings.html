@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Codebro Settings</title>
+    <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+    <div class="settings-container">
+        <div class="settings-sidebar">
+            <h2>Settings</h2>
+            <nav>
+                <ul>
+                    <li class="active" data-section="general">General</li>
+                    <li data-section="appearance">Appearance</li>
+                    <li data-section="privacy">Privacy</li>
+                    <li data-section="advanced">Advanced</li>
+                </ul>
+            </nav>
+        </div>
+        
+        <div class="settings-content">
+            <section id="general" class="active">
+                <h3>General Settings</h3>
+                <div class="setting-group">
+                    <label>
+                        <input type="checkbox" id="startupPage"> 
+                        Open last session on startup
+                    </label>
+                    <label>
+                        <input type="checkbox" id="newTabDefault"> 
+                        Open new tab with search page
+                    </label>
+                    <label>
+                        Search Engine:
+                        <select id="searchEngine">
+                            <option value="google">Google</option>
+                            <option value="duckduckgo">DuckDuckGo</option>
+                            <option value="bing">Bing</option>
+                            <option value="ecosia">Ecosia</option>
+                        </select>
+                    </label>
+                </div>
+            </section>
+
+            <section id="appearance">
+                <h3>Appearance</h3>
+                <div class="setting-group">
+                    <label>Theme:</label>
+                    <select id="themeSelect">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="system">System Default</option>
+                    </select>
+                </div>
+            </section>
+
+            <section id="privacy">
+                <h3>Privacy</h3>
+                <div class="setting-group">
+                    <label>
+                        <input type="checkbox" id="clearHistoryOnExit"> 
+                        Clear browsing history on exit
+                    </label>
+                    <label>
+                        <input type="checkbox" id="trackingProtection"> 
+                        Enable tracking protection
+                    </label>
+                </div>
+            </section>
+
+            <section id="advanced">
+                <h3>Advanced Settings</h3>
+                <div class="setting-group">
+                    <label>
+                        <input type="checkbox" id="hardwareAcceleration"> 
+                        Enable hardware acceleration
+                    </label>
+                    <label>
+                        Download location:
+                        <input type="text" id="downloadLocation" readonly>
+                        <button id="changeDownloadLocation">Change</button>
+                    </label>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="settings.js"></script>
+</body>
+</html>
