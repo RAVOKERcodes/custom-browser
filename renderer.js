@@ -1160,6 +1160,15 @@ function navigateToURL(url) {
     }
 }
 
+// Reload Current Tab
+const reloadButton = document.getElementById('reload');
+reloadButton.addEventListener('click', () => {
+    const currentTab = tabManager.tabs[tabManager.activeTabIndex];
+    if (currentTab && currentTab.webview) {
+        currentTab.webview.reload();
+    }
+});
+
 // VPN Management
 const vpnModal = document.getElementById('vpnModal');
 const vpnToggle = document.getElementById('vpnToggle');
