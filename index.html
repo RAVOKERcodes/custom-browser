@@ -121,11 +121,36 @@
             justify-content: space-between;
             margin-top: 10px;
         }
+
+        .tabs-container {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .tab-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .tab-btn:hover {
+            background-color: #f0f0f0;
+        }
+
     </style>
 </head>
 <body>
     <div id="browser" style="display: flex; gap: 10px; align-items: center;">
-        <h1>Codebro </h1>
+        <h1>codebro</h1>
         <div class="browser-controls">
             <button id="back">←</button>
             <button id="forward">→</button>
@@ -134,40 +159,44 @@
             <button id="themeToggle" onclick="toggleTheme()">🌓 Theme</button>
             <button id="showDownloads">📥</button>
         </div>
-        
+    </div>
+    <div class="tabs-container">
+        <div id="tabBar" class="tab-bar">
+            <button id="addTabBtn" class="tab-btn">+</button>
+        </div>
     </div>
 
     <div style="display: flex; width: 100%;">
-        <div class="button-bar">
-            <button onclick="openPanel('chatgpt', 'https://chat.openai.com')">ChatGPT</button>
-            <button onclick="openPanel('whatsapp', 'https://web.whatsapp.com')">WhatsApp</button>
-            <button onclick="openPanel('spotify', 'https://open.spotify.com')">Spotify</button>
-            <hr>
-            <div id="customButtons"></div>
-            <button onclick="showAddButtonForm()">Add Button</button>
-        </div>
 
-        <div id="sidePanel" class="side-panel">
-            <div class="panel-header">
-                <h3 class="panel-title"></h3>
-                <div class="panel-controls">
-                    <button onclick="detachPanel()">Detach</button>
-                    <button onclick="closePanel()">Close</button>
-                </div>
+    <div class="button-bar">
+        <button onclick="openPanel('chatgpt', 'https://chat.openai.com')">ChatGPT</button>
+        <button onclick="openPanel('whatsapp', 'https://web.whatsapp.com')">WhatsApp</button>
+        <button onclick="openPanel('spotify', 'https://open.spotify.com')">Spotify</button>
+        <hr>
+        <div id="customButtons"></div>
+        <button onclick="showAddButtonForm()">Add Button</button>
+    </div>
+
+    <div id="sidePanel" class="side-panel">
+        <div class="panel-header">
+            <h3 class="panel-title"></h3>
+            <div class="panel-controls">
+                <button onclick="detachPanel()">Detach</button>
+                <button onclick="closePanel()">Close</button>
             </div>
-            <webview id="panelWebview" style="width: 100%; height: calc(100vh - 50px);"></webview>
         </div>
-        
-        <div id="downloadPanel" class="side-panel">
-            <div class="panel-header">
-                <h2>Downloads</h2>
-                <button id="clearDownloads">Clear All</button>
-                <button id="closeDownloadPanel">Close</button>
-            </div>
-            <div id="downloadList"></div>
+        <webview id="panelWebview" style="width: 100%; height: calc(100vh - 50px);"></webview>
+    </div>
+    
+    <div id="downloadPanel" class="side-panel">
+        <div class="panel-header">
+            <h2>Downloads</h2>
+            <button id="clearDownloads">Clear All</button>
+            <button id="closeDownloadPanel">Close</button>
         </div>
-        
-        <div style="flex: 1;">
+        <div id="downloadList"></div>
+        </div>
+        <div class="webview-container" style="flex: 1;">
             <webview id="webview" style="width: 100%; height: calc(100vh - 100px);" src="https://www.google.com"></webview>
         </div>
     </div>
