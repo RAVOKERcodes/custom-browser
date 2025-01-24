@@ -661,6 +661,110 @@ document.addEventListener('click', (event) => {
     }
 });
 
+// Search Suggestions
+const suggestionDropdown = document.getElementById('suggestionDropdown');
+const historySuggestions = document.getElementById('historySuggestions');
+const googleSuggestions = document.getElementById('googleSuggestions');
+
+// Debounce function to limit API calls
+function debounce(func, delay) {
+    let timeoutId;
+    return function (...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
+// Get suggestions from browser history
+async function getHistorySuggestions(query) {
+    try {
+        const suggestions = await ipcRenderer.invoke('get-history-suggestions', query);
+        return suggestions.slice(0, 5); // Limit to 5 suggestions
+    } catch (error) {
+        console.error('History suggestions error:', error);
+        return [];
+    }
+}
+
+// Get suggestions from Google
+async function getGoogleSuggestions(query) {
+    try {
+        const response = await fetch(`https://suggestqueries.google.com/complete/search?output=firefox&q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        return data[1].slice(0, 5); // Limit to 5 suggestions
+    } catch (error) {
+        console.error('Google suggestions error:', error);
+        return [];
+    }
+}
+
+// Render suggestions
+function renderSuggestions(historySugs, googleSugs) {
+    // Clear previous suggestions
+    historySuggestions.innerHTML = '<div class="suggestion-header">Recent History</div>';
+    googleSuggestions.innerHTML = '<div class="suggestion-header">Google Suggestions</div>';
+
+    // Render history suggestions
+    historySugs.forEach(suggestion => {
+        const suggestionItem = document.createElement('div');
+        suggestionItem.classList.add('suggestion-item');
+        suggestionItem.innerHTML = `
+            <div class="title">${suggestion.title}</div>
+            <div class="url">${suggestion.url}</div>
+        `;
+        suggestionItem.addEventListener('click', () => {
+            urlInput.value = suggestion.url;
+            navigateTo(suggestion.url);
+            suggestionDropdown.style.display = 'none';
+        });
+        historySuggestions.appendChild(suggestionItem);
+    });
+
+    // Render Google suggestions
+    googleSugs.forEach(suggestion => {
+        const suggestionItem = document.createElement('div');
+        suggestionItem.classList.add('suggestion-item');
+        suggestionItem.innerHTML = `
+            <div class="title">${suggestion}</div>
+        `;
+        suggestionItem.addEventListener('click', () => {
+            urlInput.value = suggestion;
+            navigateTo(`https://www.google.com/search?q=${encodeURIComponent(suggestion)}`);
+            suggestionDropdown.style.display = 'none';
+        });
+        googleSuggestions.appendChild(suggestionItem);
+    });
+
+    // Show/hide dropdown based on suggestions
+    suggestionDropdown.style.display = 
+        (historySugs.length > 0 || googleSugs.length > 0) ? 'block' : 'none';
+}
+
+// Fetch and display suggestions
+const fetchSuggestions = debounce(async (query) => {
+    if (query.length < 2) {
+        suggestionDropdown.style.display = 'none';
+        return;
+    }
+
+    const [historySugs, googleSugs] = await Promise.all([
+        getHistorySuggestions(query),
+        getGoogleSuggestions(query)
+    ]);
+
+    renderSuggestions(historySugs, googleSugs);
+}, 300);
+
+// Event listeners
+urlInput.addEventListener('input', (e) => fetchSuggestions(e.target.value));
+
+// Close suggestions when clicking outside
+document.addEventListener('click', (e) => {
+    if (!urlInput.contains(e.target) && !suggestionDropdown.contains(e.target)) {
+        suggestionDropdown.style.display = 'none';
+    }
+});
+
 // History Panel Management
 const historyPanel = document.createElement('div');
 historyPanel.id = 'historyPanel';

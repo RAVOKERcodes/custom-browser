@@ -140,6 +140,33 @@ function setupProxyHandlers(mainWindow) {
     });
 }
 
+// History Suggestions Handler
+function setupHistorySuggestionsHandler() {
+    ipcMain.handle('get-history-suggestions', async (event, query) => {
+        try {
+            // Retrieve history from the database
+            const stmt = db.prepare(`
+                SELECT title, url 
+                FROM history 
+                WHERE title LIKE ? OR url LIKE ? 
+                ORDER BY last_visit_time DESC 
+                LIMIT 10
+            `);
+            
+            const searchQuery = `%${query}%`;
+            const results = stmt.all(searchQuery, searchQuery);
+            
+            return results.map(item => ({
+                title: item.title || item.url,
+                url: item.url
+            }));
+        } catch (error) {
+            console.error('Error fetching history suggestions:', error);
+            return [];
+        }
+    });
+}
+
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1200,
@@ -162,6 +189,9 @@ function createWindow() {
 
     // Setup proxy handlers
     setupProxyHandlers(mainWindow);
+
+    // Setup history suggestions handler
+    setupHistorySuggestionsHandler();
 
     // Rest of your existing window setup code
     mainWindow.loadFile('index.html');
