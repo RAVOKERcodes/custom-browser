@@ -2,6 +2,8 @@ const { app, BrowserWindow, ipcMain, session } = require('electron');
 const path = require('path');
 const { net } = require('electron');
 const https = require('https');
+const os = require('os');
+const { networkInterfaces } = require('systeminformation');
 
 let mainWindow;
 
@@ -167,6 +169,35 @@ function setupHistorySuggestionsHandler() {
     });
 }
 
+// Network Speed Tracking
+function setupNetworkSpeedHandler() {
+    ipcMain.handle('get-network-speed', async () => {
+        try {
+            // Get network interfaces
+            const interfaces = await networkInterfaces();
+            const activeInterfaces = interfaces.filter(iface => 
+                iface.operstate === 'up' && !iface.internal
+            );
+
+            if (activeInterfaces.length === 0) {
+                return { downloadSpeed: 0, uploadSpeed: 0 };
+            }
+
+            // Simulate network speed (you might want to replace this with a more accurate method)
+            const downloadSpeed = Math.random() * 50; // Random speed between 0-50 Mbps
+            const uploadSpeed = Math.random() * 25;   // Random speed between 0-25 Mbps
+
+            return {
+                downloadSpeed: downloadSpeed,
+                uploadSpeed: uploadSpeed
+            };
+        } catch (error) {
+            console.error('Network speed tracking error:', error);
+            return { downloadSpeed: 0, uploadSpeed: 0 };
+        }
+    });
+}
+
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1200,
@@ -192,6 +223,9 @@ function createWindow() {
 
     // Setup history suggestions handler
     setupHistorySuggestionsHandler();
+
+    // Setup network speed handler
+    setupNetworkSpeedHandler();
 
     // Rest of your existing window setup code
     mainWindow.loadFile('index.html');

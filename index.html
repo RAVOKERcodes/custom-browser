@@ -279,9 +279,56 @@
             font-size: 0.8em;
             margin-top: 3px;
         }
+
+        .network-speed-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 15px;
+            background-color: rgba(0,0,0,0.1);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            z-index: 1000;
+            transition: background-color 0.3s;
+        }
+
+        .network-speed-indicator:hover {
+            background-color: rgba(0,0,0,0.2);
+        }
+
+        .speed-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .speed-icon {
+            font-weight: bold;
+            opacity: 0.7;
+        }
+
+        #downloadSpeed .speed-icon {
+            color: green;
+        }
+
+        #uploadSpeed .speed-icon {
+            color: blue;
+        }
     </style>
 </head>
 <body>
+    <div id="networkSpeedIndicator" class="network-speed-indicator">
+        <div id="downloadSpeed" class="speed-item">
+            <span class="speed-icon">↓</span>
+            <span id="downloadSpeedValue">0</span> Mbps
+        </div>
+        <div id="uploadSpeed" class="speed-item">
+            <span class="speed-icon">↑</span>
+            <span id="uploadSpeedValue">0</span> Mbps
+        </div>
+    </div>
     <div id="browser" style="display: flex; gap: 10px; align-items: center; justify-content: center;">
         <h1>codebro</h1>
         <div class="browser-controls" style="display: flex; gap: 10px; justify-content: center;">

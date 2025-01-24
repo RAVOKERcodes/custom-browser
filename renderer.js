@@ -1421,3 +1421,44 @@ function showNotification(title, message) {
 
 // Initialize VPN status bar as hidden
 vpnStatusBar.style.display = 'none';
+
+// Network Speed Tracking
+const downloadSpeedValue = document.getElementById('downloadSpeedValue');
+const uploadSpeedValue = document.getElementById('uploadSpeedValue');
+const networkSpeedIndicator = document.getElementById('networkSpeedIndicator');
+
+// Network speed tracking function
+function trackNetworkSpeed() {
+    const networkInterface = require('os').networkInterfaces();
+    const { networkInterfaces } = require('systeminformation');
+
+    async function updateNetworkSpeed() {
+        try {
+            const interfaces = await networkInterfaces();
+            const activeInterfaces = interfaces.filter(iface => 
+                iface.operstate === 'up' && !iface.internal
+            );
+
+            if (activeInterfaces.length > 0) {
+                const speedInfo = await ipcRenderer.invoke('get-network-speed');
+                
+                // Update download and upload speed
+                downloadSpeedValue.textContent = speedInfo.downloadSpeed.toFixed(2);
+                uploadSpeedValue.textContent = speedInfo.uploadSpeed.toFixed(2);
+
+                // Optional: Color coding for speed
+                networkSpeedIndicator.style.opacity = speedInfo.downloadSpeed > 0 ? 1 : 0.5;
+            }
+        } catch (error) {
+            console.error('Network speed tracking error:', error);
+            networkSpeedIndicator.style.opacity = 0.5;
+        }
+    }
+
+    // Update every 5 seconds
+    updateNetworkSpeed();
+    setInterval(updateNetworkSpeed, 5000);
+}
+
+// Initialize network speed tracking
+trackNetworkSpeed();
