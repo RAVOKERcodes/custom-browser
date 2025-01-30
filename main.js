@@ -303,6 +303,48 @@ function setupRAMUsageHandler() {
     });
 }
 
+// Battery Status Tracking
+function setupBatteryStatusHandler() {
+    let lastBatteryStatus = null;
+
+    // Function to check and emit battery status changes
+    async function checkBatteryStatus() {
+        try {
+            const { battery } = require('systeminformation');
+            
+            // Get battery information
+            const batteryInfo = await battery();
+            
+            const currentStatus = {
+                percentage: Math.round(batteryInfo.percent),
+                isCharging: batteryInfo.isCharging,
+                timeRemaining: batteryInfo.timeRemaining
+            };
+
+            // Check if status has changed
+            if (!lastBatteryStatus || 
+                currentStatus.percentage !== lastBatteryStatus.percentage || 
+                currentStatus.isCharging !== lastBatteryStatus.isCharging) {
+                
+                // Update last known status
+                lastBatteryStatus = currentStatus;
+            }
+
+            return currentStatus;
+        } catch (error) {
+            console.error('Battery status tracking error:', error);
+            return { 
+                percentage: -1, 
+                isCharging: false, 
+                timeRemaining: 0 
+            };
+        }
+    }
+
+    // Initial handler setup
+    ipcMain.handle('get-battery-status', checkBatteryStatus);
+}
+
 async function createWindow() {
     // Initialize electron-store first
     await initStore();
@@ -339,6 +381,9 @@ async function createWindow() {
 
     // Setup RAM usage handler
     setupRAMUsageHandler();
+
+    // Setup battery status handler
+    setupBatteryStatusHandler();
 
     // Setup settings handlers
     setupSettingsHandlers();

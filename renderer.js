@@ -1505,3 +1505,45 @@ settingsButton.addEventListener('click', () => {
 // Add settings button to browser controls
 const browserControls = document.querySelector('.browser-controls');
 browserControls.appendChild(settingsButton);
+
+// Battery Status Tracking
+const batteryUsage = document.getElementById('batteryUsage');
+const batteryIcon = document.getElementById('batteryIcon');
+const batteryPercentage = document.getElementById('batteryPercentage');
+
+// Battery tracking function
+function trackBatteryStatus() {
+    async function updateBatteryStatus() {
+        try {
+            const batteryInfo = await ipcRenderer.invoke('get-battery-status');
+            
+            // Update battery percentage
+            if (batteryInfo.percentage !== -1) {
+                batteryPercentage.textContent = batteryInfo.percentage;
+
+                // Add low battery warning
+                if (batteryInfo.percentage <= 20) {
+                    batteryUsage.classList.add('low-battery');
+                    batteryIcon.textContent = '🔴';
+                } else {
+                    batteryUsage.classList.remove('low-battery');
+                    batteryIcon.textContent = batteryInfo.isCharging ? '🔌' : '🔋';
+                }
+            } else {
+                // No battery detected
+                batteryPercentage.textContent = 'N/A';
+                batteryIcon.textContent = '🔋';
+            }
+        } catch (error) {
+            console.error('Battery status tracking error:', error);
+            batteryPercentage.textContent = 'ERR';
+        }
+    }
+
+    // Update every 30 seconds
+    updateBatteryStatus();
+    setInterval(updateBatteryStatus, 30000);
+}
+
+// Initialize battery status tracking
+trackBatteryStatus();

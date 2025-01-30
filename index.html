@@ -320,6 +320,20 @@
         #ramUsage .speed-icon {
             color: purple;
         }
+
+        #batteryUsage .speed-icon {
+            color: green;
+        }
+
+        #batteryUsage.low-battery .speed-icon {
+            color: red;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body>
@@ -335,6 +349,10 @@
         <div id="ramUsage" class="speed-item">
             <span class="speed-icon">🧠</span>
             <span id="ramUsageValue">0</span> MB
+        </div>
+        <div id="batteryUsage" class="speed-item">
+            <span id="batteryIcon" class="speed-icon">🔋</span>
+            <span id="batteryPercentage">0</span>%
         </div>
     </div>
     <div id="browser" style="display: flex; gap: 10px; align-items: center; justify-content: center;">
