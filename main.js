@@ -278,6 +278,31 @@ function applySettings(settings) {
     }
 }
 
+// RAM Usage Tracking
+function setupRAMUsageHandler() {
+    ipcMain.handle('get-ram-usage', async () => {
+        try {
+            // Use process.memoryUsage() for more reliable browser-specific memory
+            const memoryUsage = process.memoryUsage();
+            
+            // Convert to MB
+            const rssMemoryMB = Math.round(memoryUsage.rss / (1024 * 1024));
+            const heapUsedMB = Math.round(memoryUsage.heapUsed / (1024 * 1024));
+
+            return {
+                browserRAM: rssMemoryMB,  // Resident Set Size
+                heapUsed: heapUsedMB      // JavaScript heap memory
+            };
+        } catch (error) {
+            console.error('RAM usage tracking error:', error);
+            return { 
+                browserRAM: 0,
+                heapUsed: 0
+            };
+        }
+    });
+}
+
 async function createWindow() {
     // Initialize electron-store first
     await initStore();
@@ -311,6 +336,9 @@ async function createWindow() {
 
     // Setup network speed handler
     setupNetworkSpeedHandler();
+
+    // Setup RAM usage handler
+    setupRAMUsageHandler();
 
     // Setup settings handlers
     setupSettingsHandlers();

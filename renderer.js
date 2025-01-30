@@ -1463,6 +1463,34 @@ function trackNetworkSpeed() {
 // Initialize network speed tracking
 trackNetworkSpeed();
 
+// RAM Usage Tracking
+const ramUsageValue = document.getElementById('ramUsageValue');
+
+// RAM tracking function
+function trackRAMUsage() {
+    async function updateRAMUsage() {
+        try {
+            const ramInfo = await ipcRenderer.invoke('get-ram-usage');
+            
+            // Ensure we have a valid number
+            const browserRAM = Number(ramInfo.browserRAM);
+            
+            // Display browser-specific RAM usage
+            ramUsageValue.textContent = isNaN(browserRAM) ? '0' : browserRAM;
+        } catch (error) {
+            console.error('RAM usage tracking error:', error);
+            ramUsageValue.textContent = '0';
+        }
+    }
+
+    // Update every 5 seconds
+    updateRAMUsage();
+    setInterval(updateRAMUsage, 5000);
+}
+
+// Initialize RAM usage tracking
+trackRAMUsage();
+
 // Settings Button
 const settingsButton = document.createElement('button');
 settingsButton.id = 'openSettings';
