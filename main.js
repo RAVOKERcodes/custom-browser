@@ -305,32 +305,27 @@ function setupRAMUsageHandler() {
 
 // Battery Status Tracking
 function setupBatteryStatusHandler() {
-    let lastBatteryStatus = null;
-
-    // Function to check and emit battery status changes
-    async function checkBatteryStatus() {
+    ipcMain.handle('get-battery-status', async () => {
         try {
-            const { battery } = require('systeminformation');
-            
-            // Get battery information
-            const batteryInfo = await battery();
-            
-            const currentStatus = {
-                percentage: Math.round(batteryInfo.percent),
-                isCharging: batteryInfo.isCharging,
-                timeRemaining: batteryInfo.timeRemaining
-            };
+            // Use Node.js native OS module for battery detection
+            const os = require('os');
+            const platform = os.platform();
 
-            // Check if status has changed
-            if (!lastBatteryStatus || 
-                currentStatus.percentage !== lastBatteryStatus.percentage || 
-                currentStatus.isCharging !== lastBatteryStatus.isCharging) {
-                
-                // Update last known status
-                lastBatteryStatus = currentStatus;
+            // Different approaches for different platforms
+            switch (platform) {
+                case 'darwin':  // macOS
+                    return await getMacBatteryStatus();
+                case 'win32':   // Windows
+                    return await getWindowsBatteryStatus();
+                case 'linux':   // Linux
+                    return await getLinuxBatteryStatus();
+                default:
+                    return { 
+                        percentage: -1, 
+                        isCharging: false, 
+                        timeRemaining: 0 
+                    };
             }
-
-            return currentStatus;
         } catch (error) {
             console.error('Battery status tracking error:', error);
             return { 
@@ -339,10 +334,66 @@ function setupBatteryStatusHandler() {
                 timeRemaining: 0 
             };
         }
-    }
+    });
+}
 
-    // Initial handler setup
-    ipcMain.handle('get-battery-status', checkBatteryStatus);
+// macOS Battery Status
+async function getMacBatteryStatus() {
+    try {
+        const { execSync } = require('child_process');
+        const batteryInfo = execSync('pmset -g batt').toString();
+        const percentMatch = batteryInfo.match(/(\d+)%/);
+        const chargingMatch = batteryInfo.includes('charging');
+
+        return {
+            percentage: percentMatch ? parseInt(percentMatch[1]) : -1,
+            isCharging: chargingMatch,
+            timeRemaining: 0
+        };
+    } catch (error) {
+        console.error('Mac battery status error:', error);
+        return { percentage: -1, isCharging: false, timeRemaining: 0 };
+    }
+}
+
+// Windows Battery Status
+async function getWindowsBatteryStatus() {
+    try {
+        const { execSync } = require('child_process');
+        const batteryInfo = execSync('powercfg /batteryreport /output battery_report.html').toString();
+        // Implement parsing logic for Windows battery report
+        return { percentage: -1, isCharging: false, timeRemaining: 0 };
+    } catch (error) {
+        console.error('Windows battery status error:', error);
+        return { percentage: -1, isCharging: false, timeRemaining: 0 };
+    }
+}
+
+// Linux Battery Status
+async function getLinuxBatteryStatus() {
+    try {
+        const fs = require('fs');
+        const batteryPath = '/sys/class/power_supply/BAT0';
+        
+        if (!fs.existsSync(batteryPath)) {
+            return { percentage: -1, isCharging: false, timeRemaining: 0 };
+        }
+
+        const capacityPath = `${batteryPath}/capacity`;
+        const statusPath = `${batteryPath}/status`;
+
+        const capacity = parseInt(fs.readFileSync(capacityPath, 'utf8').trim());
+        const status = fs.readFileSync(statusPath, 'utf8').trim();
+
+        return {
+            percentage: !isNaN(capacity) ? capacity : -1,
+            isCharging: status === 'Charging',
+            timeRemaining: 0
+        };
+    } catch (error) {
+        console.error('Linux battery status error:', error);
+        return { percentage: -1, isCharging: false, timeRemaining: 0 };
+    }
 }
 
 async function createWindow() {
