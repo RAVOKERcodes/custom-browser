@@ -30,3 +30,7 @@ The sidebar features a fully customizable shortcuts system:
 ```bash
 npm install
 ```
+4. Run browser
+```bash
+npm start
+```
