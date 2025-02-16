@@ -73,7 +73,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            background: white;
+            background: theme-get("background-color");
             z-index: 2001;
             position: relative;
         }
@@ -125,18 +125,18 @@
         .tabs-container {
             display: flex;
             align-items: center;
-            padding: 10px;
+            padding: 5px;
             border-bottom: 1px solid #ccc;
         }
 
         .tab-bar {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 5px;
         }
 
         .tab-btn {
-            padding: 10px;
+            padding: 5px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -361,7 +361,7 @@
             <button id="back">←</button>
             <button id="forward">→</button>
             <div class="url-container"">
-                <input type="text" id="url" placeholder="Enter URL" autocomplete="on">
+                <input type="text" id="url" placeholder="Enter URL" autocomplete="on"">
                 <div id="suggestionDropdown" class="suggestion-dropdown">
                     <div id="historySuggestions" class="suggestion-section">
                         <div class="suggestion-header">Recent History</div>

@@ -37,6 +37,34 @@
 webview {
     border: none;
 }
+
+/* Dark theme styles for webview */
+:root[data-theme="dark"] webview {
+    background-color: var(--bg-color);
+    color-scheme: dark;
+    filter: invert(90%) hue-rotate(180deg);
+}
+
+:root[data-theme="dark"] webview::-webkit-scrollbar {
+    width: 12px;
+    background-color: var(--bg-color);
+}
+
+:root[data-theme="dark"] webview::-webkit-scrollbar-thumb {
+    background-color: var(--button-bg);
+    border-radius: 6px;
+}
+
+:root[data-theme="dark"] webview::-webkit-scrollbar-track {
+    background-color: var(--bg-color);
+}
+
+/* Prevent inversion of images and videos in dark theme */
+:root[data-theme="dark"] webview img,
+:root[data-theme="dark"] webview video {
+    filter: invert(100%) hue-rotate(180deg);
+}
+
 html, body {
 
     margin: 0;
@@ -98,7 +126,7 @@ button:hover {
     display: flex;
     align-items: center;
     padding: 5px;
-    background-color: #f1f1f1;
+    background-color: theme-color();
     border-bottom: 1px solid #ccc;
 }
 
