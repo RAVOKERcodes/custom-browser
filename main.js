@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, session } = require('electron');
+const { app, BrowserWindow, ipcMain, session, Menu } = require('electron');
 const path = require('path');
 const { net } = require('electron');
 const https = require('https');
@@ -414,7 +414,8 @@ async function createWindow() {
             webSecurity: false
         },
     });
-
+    // Disable context menu
+    Menu.setApplicationMenu(null);
     // Setup download handler
     setupDownloadHandler(mainWindow);
 
