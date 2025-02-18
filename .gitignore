@@ -15,6 +15,7 @@ yarn.lock
 dist/
 build/
 out/
+battery_report.html
 
 # OS generated files
 .DS_Store
