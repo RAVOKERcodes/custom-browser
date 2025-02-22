@@ -69,7 +69,7 @@ class TabManager {
         const webview = document.createElement('webview');
         webview.src = url;
         webview.style.width = '100%';
-        webview.style.height = '100%';
+        webview.style.height = 'calc(100vh - 180px)';
         webview.style.display = 'none';
 
         // Tab management
