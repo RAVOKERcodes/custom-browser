@@ -7,9 +7,13 @@
     <title>codesurf</title>
 </head>
 <body>
-    
-    <div id="browser" style="gap: 10px; ">
-        <h1 style="font-family: Segoe UI Variable Text Semibold;">codebro</h1>
+    <div class="tabs-container">
+        <div id="tabBar" class="tab-bar">
+            <button id="addTabBtn" class="tab-btn">+</button>
+        </div>
+    </div>
+    <div id="browser" style="gap: 10px;">
+        <h1 style="font-family: Segoe UI Variable Text Semibold;">codesurf</h1>
         <div class="browser-controls" style="display: flex; gap: 10px; justify-content: center;">
             <button id="back">←</button>
             <button id="forward">→</button>
@@ -30,14 +34,10 @@
             <button id="themeToggle" onclick="toggleTheme()">🌓 Theme</button>
             <button id="showDownloads">📥</button>
             <button id="vpnToggle" onclick="showVPNModal()">🌐</button>
-            <button id="showHistory" onclick="renderHistoryPanel()">📋</button>
+            <button id="showHistory">📋</button>
         </div>
     </div>
-    <div class="tabs-container">
-        <div id="tabBar" class="tab-bar">
-            <button id="addTabBtn" class="tab-btn">+</button>
-        </div>
-    </div>
+    
 
     <div style="display: flex; width: 100%;">
 
@@ -70,22 +70,10 @@
         <div id="downloadList"></div>
         </div>
         <div class="webview-container" style="flex: 1;">
-            <webview id="webview" style="width: 100%; height: calc(100vh - 180px);" src="https://www.google.com"></webview>
+            <webview id="webview" style="width: 100%; height: calc(100vh - 175px);" src="https://www.google.com"></webview>
         </div>
     </div>
-    <div id="historypanel" class="side-panel">
-        <div class="panel-header">
-            <h2>History</h2>
-            <button id="clearHistory">Clear All</button>
-            <button id="closeHistoryPanel">Close</button>
-        </div>
-        <div id="downloadList"></div>
-        </div>
-        <div class="webview-container" style="flex: 1;">
-            <webview id="webview" style="width: 100%; height: calc(100vh - 180px);" src="https://www.google.com"></webview>
-        </div>
-    </div>
-
+    
     <div id="customContextMenu" class="context-menu">
         <div class="context-menu-item" id="editButton">Edit Button</div>
         <div class="context-menu-item" id="removeButton">Remove Button</div>
